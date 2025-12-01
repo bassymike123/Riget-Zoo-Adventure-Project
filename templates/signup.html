@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content%}
+<div class="hero">
+    <div class="form-panel"></div>
+    <h2 class="panel-title">Sign Up</h2>
+    <form id="signupForm" method="POST" action="{{ url_for('signup') }}"></form>
+    <label>Full Name</label>
+    <input type="text" name="full_name" id="full_name" required>
+
+    <label> Date of Birth</label>
+    <input type="date">
+
+
+
+</div>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riget Zoo Aventures</title>
+    <link rel="stylesheet"  href="/static/css.css">
+</head>
+<body>
+    <header class="site_header">
+        <div class="logo-wrapp">
+            <img src="/static/images/logo.png" class="logo">
+        </div>
+    </header>
+
+    <main class="site-main">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container">
+            {% for category, msg in messages %}
+            <div class="flash-msg {{ category }}">{{ msg }}</div>
+            {% endfor%}
+        </div>
+        {% endif%}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    
+</body>
+</html>
