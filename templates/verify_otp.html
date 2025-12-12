@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - Riget Zoo Adventure</title>
+    <link rel="stylesheet" href="/static/forgot_password.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-box">
+            <h1>Verify OTP</h1>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+
+            <form method="POST" action="/verify_otp">
+                <input type="text" name="otp" placeholder="Enter OTP" maxlength="6" required>
+                <button type="submit">Verify</button>
+
+                <div class="info-text">
+                    <p>Didn't recieve it? You can request another OTP after <strong>90 seconds</strong></p>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

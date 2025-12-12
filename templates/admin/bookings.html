@@ -1,0 +1,82 @@
+{% extends "admin/base.html" %}
+{% block content %}
+<h1 class="page-title">Booking Management</h1>
+
+<!-- FILTER BAR -->
+<form method="GET" class="filter-bar">
+<input type="date" name="date" class="filter-input"
+          value="{{ request.args.get('date', '') }}">
+<select name="user_id" class="filter-input">
+<option value="">All Users</option>
+       {% for u in users %}
+<option value="{{ u.user_id }}"
+           {% if request.args.get('user_id') == u.user_id|string %}selected{% endif %}
+>{{ u.full_name }}</option>
+       {% endfor %}
+</select>
+<select name="visit_type" class="filter-input">
+<option value="">All Visit Types</option>
+       {% for vt in visit_types %}
+<option value="{{ vt.visit_type_id }}"
+           {% if request.args.get('visit_type') == vt.visit_type_id|string %}selected{% endif %}
+>{{ vt.name }}</option>
+       {% endfor %}
+</select>
+<select name="status" class="filter-input">
+<option value="">All Statuses</option>
+<option value="Pending" {% if request.args.get('status') == "Pending" %}selected{% endif %}>Pending</option>
+<option value="Confirmed" {% if request.args.get('status') == "Confirmed" %}selected{% endif %}>Confirmed</option>
+<option value="Cancelled" {% if request.args.get('status') == "Cancelled" %}selected{% endif %}>Cancelled</option>
+</select>
+<input type="text" name="search" placeholder="Search booking ID…"
+          class="filter-input"
+          value="{{ request.args.get('search', '') }}">
+<button class="btn btn-primary">Apply</button>
+</form>
+<!-- BOOKINGS TABLE -->
+<table class="table admin-table">
+<thead>
+<tr>
+<th>ID</th>
+<th>User</th>
+<th>Visit Type</th>
+<th>Date</th>
+<th>Guests</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+       {% for b in bookings %}
+<tr>
+<td>{{ b.booking_id }}</td>
+<td>{{ b.user.full_name }}</td>
+<td>{{ b.visit_type.name }}</td>
+<td>{{ b.visit_date }}</td>
+<td>{{ b.number_of_guests }}</td>
+<td>
+<form method="POST"
+                     action="{{ url_for('admin.update_booking_status', booking_id=b.booking_id) }}">
+<select name="status" class="status-dropdown" onchange="this.form.submit()">
+<option value="Pending"   {% if b.status=='Pending' %}selected{% endif %}>Pending</option>
+<option value="Confirmed" {% if b.status=='Confirmed' %}selected{% endif %}>Confirmed</option>
+<option value="Cancelled" {% if b.status=='Cancelled' %}selected{% endif %}>Cancelled</option>
+</select>
+</form>
+</td>
+<td>
+<a href="{{ url_for('admin.edit_booking', booking_id=b.booking_id) }}"
+                  class="btn btn-small">Edit</a>
+</td>
+</tr>
+       {% else %}
+<tr>
+<td colspan="7" style="text-align:center; padding:20px;">
+               No bookings found.
+</td>
+</tr>
+       {% endfor %}
+</tbody>
+</table>
+
+{% endblock %}

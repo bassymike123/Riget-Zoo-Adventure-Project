@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin – Visit Types</title>
+<link rel="stylesheet" href="/static/admin_dashboard.css">
+</head>
+<body>
+<div class="admin-shell">
+
+<main class="admin-main">
+<header class="admin-header">
+<h1>Visit Types</h1>
+</header>
+<section class="panel">
+<h2>Add Visit Type</h2>
+<form action="{{ url_for('add_visit_type') }}" method="POST" class="form-grid">
+<input name="name" placeholder="Name" required>
+<input name="price" placeholder="Price" required>
+<input name="description" placeholder="Description">
+<button class="btn" type="submit">Add</button>
+</form>
+</section>
+<section class="panel">
+<h2>Existing Visit Types</h2>
+<table class="table">
+<thead>
+<tr>
+<th>Name</th>
+<th>Price (£)</th>
+<th>Description</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody>
+
+                        {% for vt in visit_types %}
+<tr>
+<td>{{ vt.name }}</td>
+<td>{{ vt.price }}</td>
+<td>{{ vt.description }}</td>
+<td class="actions-cell">
+<form action="{{ url_for('edit_visit_type', vt_id=vt.visit_type_id) }}"
+
+                                      method="POST" class="inline-form">
+<input name="name" value="{{ vt.name }}" required>
+<input name="price" value="{{ vt.price }}" required>
+<input name="description" value="{{ vt.description }}">
+<button class="btn-sm" type="submit">Save</button>
+</form>
+<form action="{{ url_for('delete_visit_type', vt_id=vt.visit_type_id) }}"
+
+                                      method="POST"
+
+                                      onsubmit="return confirm('Delete this visit type?')">
+<button class="btn-danger btn-sm" type="submit">Delete</button>
+</form>
+</td>
+</tr>
+
+                        {% else %}
+<tr><td colspan="4">No visit types added yet.</td></tr>
+
+                        {% endfor %}
+</tbody>
+</table>
+</section>
+</main>
+</div>
+<script src="/static/admin_dashboard.js"></script>
+</body>
+</html>
+ 

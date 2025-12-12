@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Dashboard</title>
+<link rel="stylesheet" href="/static/user_dashboard.css">
+</head>
+<body>
+<!-- Top Header -->
+<header class="header">
+<h1>Welcome back, <span id="user-name">User</span></h1>
+</header>
+<!-- Tab Navigation -->
+<nav class="tabs">
+<button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+<button class="tab-btn" data-tab="profile">Profile</button>
+<button class="tab-btn" data-tab="bookings">Bookings</button>
+<button class="tab-btn" data-tab="loyalty">Loyalty</button>
+<button class="tab-btn" data-tab="settings">Settings</button>
+</nav>
+<!-- MAIN CONTENT WRAPPER -->
+<section id="tab-content">
+<!-- DASHBOARD TAB -->
+<div class="tab-page active" id="dashboard">
+<div class="card-grid">
+<div class="card">
+<h2>Loyalty Points</h2>
+<p class="big-number" id="loyalty-points">0</p>
+</div>
+<div class="card">
+<h2>Upcoming Bookings</h2>
+<ul id="upcoming-list">
+<li>No upcoming bookings</li>
+</ul>
+</div>
+<div class="card">
+<h2>Recent Activity</h2>
+<ul id="activity-list">
+<li>No recent activity</li>
+</ul>
+</div>
+</div>
+</div>
+<!-- PROFILE TAB -->
+<div class="tab-page" id="profile">
+<div class="card">
+<h2>Your Profile</h2>
+<div class="profile-field">
+<label>Full Name:</label>
+<span id="profile-name">Loading...</span>
+</div>
+<div class="profile-field">
+<label>Email:</label>
+<span id="profile-email">Loading...</span>
+</div>
+<div class="profile-field">
+<label>Date of Birth:</label>
+<span id="profile-dob">Loading...</span>
+</div>
+<div class="profile-field">
+<label>Member Since:</label>
+<span id="profile-member-since">Loading...</span>
+</div>
+</div>
+</div>
+<!-- BOOKINGS TAB -->
+<div class="tab-page" id="bookings">
+<div class="card">
+<h2>Make a Booking</h2>
+<form id="booking-form">
+<label>Visit Type</label>
+<select id="visit-type">
+<option value="">Select Visit</option>
+<option value="1">Zoo Visit</option>
+<option value="2">Educational Visit</option>
+<option value="3">Safari Hotel</option>
+</select>
+<label>Date</label>
+<input type="date" id="visit-date">
+<label>Guests</label>
+<input type="number" id="guests" min="1" value="1">
+<button type="submit" class="btn">Book Now</button>
+</form>
+</div>
+<div class="card">
+<h2>Your Bookings</h2>
+<ul id="booking-history">
+<li>No bookings yet</li>
+</ul>
+</div>
+</div>
+<!-- LOYALTY TAB -->
+<div class="tab-page" id="loyalty">
+<div class="card">
+<h2>Your Membership</h2>
+<p>Current Plan: <span id="membership-plan">Starter (Free)</span></p>
+<h3>Benefits</h3>
+<ul>
+<li>10% discount on all bookings</li>
+<li>Points earned per £1 spent (for premium plans)</li>
+<li>Redeem points for perks</li>
+</ul>
+</div>
+<div class="card">
+<h2>Redeem Points</h2>
+<ul>
+<li>100 Points = £5 off</li>
+<li>200 Points = Free Drink</li>
+<li>400 Points = Free Ticket</li>
+</ul>
+</div>
+</div>
+<!-- SETTINGS TAB -->
+<div class="tab-page" id="settings">
+<div class="card">
+<h2>Settings</h2>
+<button class="btn danger" id="logout-btn">Logout</button>
+</div>
+</div>
+</section>
+<script src="/static/user_dashboard.js"></script>
+</body>
+</html>
+ 

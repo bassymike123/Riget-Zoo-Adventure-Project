@@ -1,15 +1,75 @@
-<!DOCTYPE html>
+<!-- templates/login.html -->
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
-    
-
-
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login — Riget Zoo Adventures</title>
+  <link rel="stylesheet" href="/static/login.css">
+  <img src="/static/images/logo.png" alt="logo" class="logo">
 </head>
 <body>
+ 
+  <div class="login-container">
+    <div class="login-box">
+      <h1>Login Page</h1>
+
+      <!--jinja2 code for flash messages to be displayed on the login page-->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+        <div class="flash {{ category }}"> {{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
+      
+      
+      <!--Form code-->
+      
+      <form method="POST" action="/login">
+        <input type="email" name="email" placeholder="name@gmail.com" required>
+        <div class="password-row">
+          <input id="password" name="password" placeholder="password" type="password" required>
+          <button type="button" class="pw-toggle" aria-label="Show password" data-target="password">
+            
+            <!--  eye SVG -->
+            <svg class="eye" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+        </div>
+
+        <!-- forgot link code -->
+        <div class="forgot-link">
+
+          <a href="{{ url_for('forgot_password') }}" class="link">Forgot Password?</a>
+        </div>
+
+        <!--footer infromation-->
+
+        <div class="info-text">
+        <p> Your Riget Zoo account information is used to allow you login securley and access your data.</p>
+        
     
+    </div>
+
+
+        <button type="submit">Login</button>
+
+        <div class="signup-link">
+          <p>Don't have an account? <a href="{{ url_for('signup') }}">Sign up</a></p>
+        </div>
+       </form>
+      </div>
+      <p class="auth-footer">Protect wildlife for a sustainable future.</p>
+    </div>
+
+     
+
+      <!--Jaa script code b-->
+  <script src="/static/login.js"></script>
 </body>
 </html>

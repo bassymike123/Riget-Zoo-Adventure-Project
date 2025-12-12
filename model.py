@@ -9,8 +9,10 @@ class User(db.Model):
     full_name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(150), nullable=False, unique=True)
     password = db.Column(db.String(200), nullable=False)
+    date_of_birth = db.Column(db.String(10), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default="User")
     date_joined = db.Column(db.DateTime, default=datetime.utcnow)
-    phone = db.Column(db.String(20))
+    
     
 # loylaty and booking relationship
 loyalty_account = db.relationship("LoyaltyAccount", backref="user", uselist=False)
@@ -85,3 +87,7 @@ class AccessibilitySettings(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable=False)
     dark_mode = db.Column(db.Boolean, default=False)
     text_size = db.Column(db.String(20), default="medium")
+    
+    
+    
+    

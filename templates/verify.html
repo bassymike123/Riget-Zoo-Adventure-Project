@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP</title>
+    <link rel="stylesheet" href="/static/verify.css">
+</head>
+<body>
+
+    <div class="verify-container">
+        <h2>Verify Your Account</h2>
+        <p>Scan the QR code below using your Microsoft or Google Authenticator.</p>
+        
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+            <div class="flash {{ category }}"> {{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+      
+
+        <div class="qr-section">
+            {% if qr_code %}
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
+            {% else %}
+            <p>QR code not available.</p>
+            {% endif %}
+        </div>
+
+        <form method ="POST" action="{{ url_for('verify') }}">
+            <input type="text" name="otp_code" placeholder="Enter the 6-digits code" required>
+            <button type="submit">Verify</button>
+        </form>
+
+        <p>Didn't recieve the code? Try refreshing.</p>
+
+            
+        </div>
+
+    
+</body>
+</html>

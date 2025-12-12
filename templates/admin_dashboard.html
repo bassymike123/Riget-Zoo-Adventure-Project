@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Admin — Riget Zoo Adventures</title>
+<link rel="stylesheet" href="/static/admin_dashboard.css">
+</head>
+<body class="admin-body">
+<div class="admin-shell">
+<aside class="admin-sidebar">
+<div class="brand">
+<h2>Riget Zoo — Admin</h2>
+</div>
+<nav class="admin-nav">
+<a href="{{ url_for('admin_dashboard') }}" class="nav-link active">Overview</a>
+<a href="{{ url_for('admin_visit_types') }}" class="nav-link">Visit Types</a>
+<a href="{{ url_for('admin_bookings') }}" class="nav-link">Bookings</a>
+<a href="{{ url_for('admin_payments') }}" class="nav-link">Payments</a>
+<a href="{{ url_for('admin_users') }}" class="nav-link">Users</a>
+<a href="{{ url_for('admin_loyalty') }}" class="nav-link">Loyalty</a>
+<form method="GET" action="{{ url_for('logout') }}">
+<button class="btn-ghost" type="submit">Logout</button>
+</form>
+</nav>
+</aside>
+<main class="admin-main">
+<header class="admin-header">
+<h1>Dashboard</h1>
+<div class="header-actions">
+<span class="stat">Users: {{ total_users }}</span>
+<span class="stat">Bookings: {{ total_bookings }}</span>
+<span class="stat">Revenue: £{{ '%.2f'|format(total_payments) }}</span>
+</div>
+</header>
+<section class="overview-cards">
+<div class="card">
+<h3>Pending Bookings</h3>
+<p class="big">{{ pending_bookings }}</p>
+</div>
+<div class="card">
+<h3>Visit Types</h3>
+<p class="big">{{ visit_types|length }}</p>
+</div>
+<div class="card">
+<h3>Recent Bookings</h3>
+<ul class="recent-list">
+
+    {% for b in recent_bookings %}
+<li>{{ b.booking_id }} — user: {{ b.user.full_name if b.user else '—' }} — {{ b.visit_date }} — {{ b.status }}</li>
+
+    {% else %}
+<li>No recent bookings</li>
+
+    {% endfor %}
+</ul>
+</div>
+</section>
+<section class="manage-area">
+<!-- Add visit type -->
+<div class="panel">
+<h2>Add visit type</h2>
+<form action="{{ url_for('add_visit_type') }}" method="POST" class="form-grid">
+<input name="name" placeholder="Name" required>
+<input name="price" placeholder="Price" required>
+<input name="description" placeholder="Short description">
+<button class="btn" type="submit">Add</button>
+</form>
+</div>
+<!-- Visit types table -->
+<div class="panel">
+<h2>Visit Types</h2>
+<table class="table">
+<thead><tr><th>ID</th><th>Name</th><th>Price</th><th>Actions</th></tr></thead>
+<tbody>
+
+    {% for vt in visit_types %}
+<tr>
+<td>{{ vt.visit_type_id }}</td>
+<td>{{ vt.name }}</td>
+<td>£{{ '%.2f'|format(vt.price) }}</td>
+<td>
+<!-- Edit -->
+<form action="{{ url_for('edit_visit_type', vt_id=vt.visit_type_id) }}" method="POST" class="inline-form">
+<input name="name" value="{{ vt.name }}" required>
+<input name="price" value="{{ vt.price }}" required>
+<input name="description" value="{{ vt.description or '' }}">
+<button class="btn-sm" type="submit">Save</button>
+</form>
+<!-- Delete -->
+<form action="{{ url_for('delete_visit_type', vt_id=vt.visit_type_id) }}" method="POST" onsubmit="return confirm('Delete visit type?')">
+<button class="btn-danger btn-sm" type="submit">Delete</button>
+</form>
+</td>
+</tr>
+
+    {% else %}
+<tr><td colspan="4">No visit types yet</td></tr>
+
+    {% endfor %}
+</tbody>
+</table>
+</div>
+</section>
+</main>
+</div>
+<script src="/static/admin_dashboard.js"></script>
+</body>
+</html>
+ 

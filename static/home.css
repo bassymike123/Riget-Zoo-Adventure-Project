@@ -1,0 +1,334 @@
+:root {
+    --bg: #000;  /* page color */
+    --accent: orange;  
+    --accent-deep: darkorange;
+    --accent-green: #0b6a3a;         /* text in pills */
+    --card-bg: rgba(20, 20, 20, 0.95);
+    --glass: rgba(255, 255, 255, 0.02);
+    --radius: 999px;
+    --radius-card: 14px;
+    --max-width: 1100px;
+    font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+
+
+
+html,body {
+    height: 100%;
+    margin: 0;
+    background: var(--bg);
+    color: #fff;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale; 
+
+
+}
+
+
+
+.hero {
+    max-width: var(--max-width);
+    margin: 36px auto;
+    display: grid;
+    grid-template-columns: 1fr 560px;  /* the left is felxible and the right is fixed to match the image size */
+    gap: 34px;
+    padding: 28px;
+    align-items: start;
+}
+
+/* left column */
+
+.hero-left {
+    padding-left: 1px;
+    position: relative;
+}
+
+/* for the logo at the top left */
+.logo-wrapp {
+    display: inline-block;
+    margin-bottom: 18px;
+    text-decoration: none;
+}
+
+.logo {
+    width: 90px;
+    height: 86px;
+    object-fit: cover;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 6px;
+}
+
+/* loyalty pill under the logo */
+.loyalty-pill {
+    margin: 8px 0 22px 0;
+}
+
+.loyalty-pill a{
+    display: inline-block;
+    text-decoration: none;
+    background: orange;
+    color: var(--accent-green);
+    padding: 8px 18px;
+    border-radius: 24px;
+    font-weight: 600;
+    box-shadow: 0 2px 0 rgba(255,123,0,0.05), 0 6px 18px rgba(255,123,0,0.06);
+
+
+}
+
+
+
+
+/* title */
+.hero-title {
+    font-size: 44px;
+    line-height: 0.96;
+    margin: 10px 0 22px 0;
+    font-weight: 900;
+    color: #e8f2f6;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.6); 
+
+}
+
+
+.primary-actions {
+    margin-top: 6px;
+}
+
+
+/* main button styling */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    cursor: pointer;
+    font-weight: 700;
+    border-radius: 36px;
+    width: 200px;
+    padding: 8px 30px;
+    box-shadow: 0 2px 18px rgba(255,123,0,0.08), 0 2px 0 rgba(255,123,0,0.06);
+
+
+}
+
+
+.btn-primary {
+    background: orange;
+    color: var(--accent-green);
+    font-size: 20px;
+    
+    
+}
+
+
+/* for booking and sign up pills */
+.small-pills {
+    margin-top: 14px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.pill {
+    display: inline-block;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 22px;
+    background: orange;
+    color: var(--accent-green);
+    font-weight: 700;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.45);
+    font-size: 14px;
+}
+
+
+/* right column  image */
+.hero-right {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    align-items: stretch;
+    margin-top: 90px;
+}
+
+
+/* image card more styling */
+.hero-image-card {
+    background: darkorange;
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 10px solid green;
+    box-shadow: 0 12px 28px black;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+   
+}
+
+.hero-image-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+
+}
+
+/* for center and right pills */
+.hero-bottom-row {
+    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+/* extra pill styling under image */
+.hero-bottom-row .pill {
+    padding: 10px 18px;
+    font-size: 15px;
+}
+
+
+/*footer */
+.site-footer {
+    width: 100%;
+    background: green;
+    color: orange;
+    padding: 28px 0;
+    margin-top: 580px;
+    border-top: 5px solid orange;
+    text-align: center;
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: 0.4px;
+   
+
+
+ 
+}
+
+
+/* hover on pills */
+a.btn, a.pill, .loyalty-pill a {
+    transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
+
+}
+
+a.btn:hover, a.pill:hover, .loyalty-pill a:hover {
+    transform: translateY(-4px);
+    filter: brightness(1.03);
+    box-shadow: 0 12px 12px green;
+}
+
+a.btn:active, a.pill:active {
+    transform: translateY(-1px) scale(0.995);
+}
+
+/*  responsive adjustments for smaller screens */
+@media (max-width: 980px) {
+    .hero {
+        grid-template-columns: 1fr;
+        padding: 20px;
+        gap: 20px;
+    }
+
+    .hero-right{
+        order: -1;
+    }  /* show image first on small screens */
+    .hero-image-card {
+        max-width: 100%;
+        aspect-ratio: 4/3;
+    }
+    .hero-title {
+        font-size: 34px;
+    }
+    .logo {
+        width: 70px;
+        height: 70px;
+    }
+}
+
+/* full page overlay */
+.cookie-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: orange;
+    backdrop-filter: blur(-2px);
+    z-index: 9997;
+    display: none;
+}
+
+/* popup box */
+.cookie-popup {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 480px;
+    background: green;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 25px orange;
+    font-family: Arial, Helvetica, sans-serif;
+    z-index: 9998;
+    display: none;
+
+}
+
+/* for  the text */
+.cookie-popup p {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    color: orange;
+}
+
+.cookie-popup a {
+    color: blue;
+    text-decoration: underline;
+}
+
+/* buttons */
+.cookie-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.cookie-buttons button {
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+#accept-cookies {
+    background-color: #004aad;
+    color: #fff;
+}
+
+#reject-cookies {
+    background-color: red;
+    color: #fff;
+}
+
+/* fade up animation */
+.fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: 0.7s ease-out;
+}
+
+.fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+

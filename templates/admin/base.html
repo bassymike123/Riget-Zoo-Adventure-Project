@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Zoo</title>
+    <link rel="stylesheet" href="/static/admin_dashboard.css">
+</head>
+<body class="admin-body">
+    <div class="admin-shell">
+        <aside class="admin-sidebar">
+            <div class="brand">
+                <h2>Riget Zoo - Admin</h2>
+            </div>
+
+            <nav class="admin-nav">
+                <a href="{{ url_for('admin_dashboard') }}" class="nav-link">Overview</a>
+                <a href="{{ url_for('admin_visit_types') }}" class="nav-link">Visit Types</a>
+                <a href="{{ url_for('admin_bookings') }}" class="nav-link">Bookings</a>
+                <a href="{{ url_for('admin_payments') }}" class="nav-link">Payments</a>
+                <a href="{{ url_for('admin_users') }}" class="nav-link">Users</a>
+                <a href="{{ url_for('admin_loyalty') }}" class="nav-link">Loyalty</a>
+                <form method="GET" action="{{ url_for('logout') }}">
+                    <button class="btn-ghost" type="submit">Logout</button>
+                </form>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    
+</body>
+</html>

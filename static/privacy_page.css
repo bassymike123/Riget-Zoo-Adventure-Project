@@ -1,0 +1,109 @@
+/*  priavacy section */
+body {
+    background: black;
+    font-family: 'Poppins', sans-serif;
+}
+
+.logo {
+    position: absolute;
+    top: 18px;
+    left: 18px;
+    width: 10%;
+    height: auto;
+    border-radius: 20%;
+    padding: 8px;
+    background: black;
+
+}
+
+.privacy-section {
+    background: black;
+    color: orange;
+    padding: 60px 8%;
+    text-align: center;
+}
+/* title */
+.privacy-title {
+    font-size: 42px;
+    color: green;
+    margin-bottom: 10px;
+}
+
+/* last updated text */
+.updated-date {
+    font-size: 18px;
+    color: lightgreen;
+    margin-bottom: 40px;
+}
+
+/* box grids */
+.privacy-grid {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+/* each box */
+.privacy-box {
+    border: 2px solid green;
+    border-radius: 12px;
+    padding: 25px;
+    width: 310px;
+    text-align: left;
+    transition: 0.3s;
+}
+
+.privacy-box:hover {
+    transform: translateY(-5px);
+}
+
+
+/* headings */
+.privacy-box h3 {
+    color: green;
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+/* Text */
+.privacy-box p {
+    font-size: 17px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+/* list */
+.privacy-box ul {
+    padding-left: 18px;
+    margin-bottom: 15px;
+}
+
+.privacy-box ul li {
+    font-size: 17px;
+    margin-bottom: 6px;
+}
+.site-footer {
+    width: 100%;
+    background: green;
+    color: orange;
+    padding: 28px 0;
+    margin-top: 580px;
+    border-top: 5px solid orange;
+    text-align: center;
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: 0.4px;
+}
+
+/* fade up animation */
+.fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: 0.7s ease-out;
+}
+
+.fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+}

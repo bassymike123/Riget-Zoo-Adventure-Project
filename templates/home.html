@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;900&display=swap" rel="stylesheet"> <!--Poppins font used throught the page-->
+    <title>Riget Zoo Adventures - Home</title>
+    <link rel="stylesheet" href="/static/home.css">
+</head>
+<body>
+    <main class="hero">
+        <!--left column-->
+        <aside class="hero-left">
+            <nav class="navbar">
+
+            </nav>
+            <img src="/static/images/logo.png" alt="Riget Zoo logo" class="logo">
+
+
+            <!--loyaly pill-->
+
+            <div class="loyalty-pill fade-up">
+                <a href="{{ url_for('loyalty') }}">Our Loyalty Scheme</a>
+            </div>
+
+            <!--main heading-->
+
+            <h1 class="hero-title">
+                WELCOME TO <br />
+                RIGET ZOO <br />
+                ADVENTURES
+
+            </h1>
+
+
+            <!--main actions-->
+
+            <div class="primary-actions fade-up">
+                <a class="btn btn-primary" href="{{ url_for('login') }}">Login</a>
+
+                <div class="small-pills">
+                    <a class="pill" href="{{ url_for('signup') }}">Sign up</a>
+
+                </div>
+            </div>
+        </aside>
+
+
+        <!--right column -->
+        <section class="hero-right fade-up">
+
+            <div class="hero-image-wrapper">
+                <div class="hero-image-card floating-card">
+                <img src="/static/images/home page logo.jpg" alt="Safari Scene" />
+            </div>
+        </div>
+            
+            <!--bottom action row -->
+            <div class="hero-bottom-row">
+                <a class="pill center" href="{{ url_for('contact_us') }}">Contact Us</a>
+                <a class="pill right" href="{{ url_for('privacy_page') }}">Privacy Terms</a>
+            </div>
+        </section>
+    </main>
+
+
+    
+
+    <footer class="site-footer">
+
+        Protect wildlife for a substainable fututre.
+
+        <div class="site-footer-info ">© 2025 Riget Zoo Adventures. All rights reserved </div>
+    
+
+    </footer>
+<!--cookie overlay message -->
+    <div id="cookie-overlay" class="cookie-overlay"></div>
+
+    <!--Cookie pop up -->
+    <div id="cookie-popup" class="cookie-popup">
+        <p>
+            We use first and third-party cookies to understand how our websites is used
+            and to improve your experience.
+            <a href="/templates/privacy_page.html" target="_blank">Learn more</a>.
+        </p>
+
+        <div class="cookie-buttons">
+            <button id="accept-cookies">Accept Cookies</button>
+            <button id="reject-cookies">Reject Cookies</button>
+        </div>
+    </div>
+
+
+    <script src="/static/home.js"></script>
+
+</body>
+</html>

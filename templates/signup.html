@@ -1,15 +1,86 @@
-{% extends "base.html" %}
-{% block content%}
-<div class="hero">
-    <div class="form-panel"></div>
-    <h2 class="panel-title">Sign Up</h2>
-    <form id="signupForm" method="POST" action="{{ url_for('signup') }}"></form>
-    <label>Full Name</label>
-    <input type="text" name="full_name" id="full_name" required>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="/static/signup.css">
+     <img src="/static/images/logo.png" alt="logo" class="logo">
 
-    <label> Date of Birth</label>
-    <input type="date">
+</head>
+
+<body>
+    <div class="signup-container">
+        <div class="signup-box">
+            <h1>Sign up</h1>            
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}  <!--flash messages would appear here-->
+            {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ messages }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="/signup">
+                <label>Enter Full Name</label>
+                <input type="text" name="fullname" placeholder="michael lee" required>
+
+                <div class="input-row">
+                    <select name="day" required>
+                        <option value="" diabled selected>Day</option>
+                        {% for day in range(1, 32) %}
+                        <option value="{{ day }}">{{ day }}</option>
+                        {% endfor %}
+                        </select>
+
+                        <select name="month" required>
+                            <option value="" disabled selected>Month</option>
+                             {% set months = ['January','February','March','April','May','June','July','August','September','October','November','December'] %}
+                             {% for month in months %}
+                            <option value="{{ month }}">{{ month }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <select name="year" required>
+                            <option value="" diabled selected>Year</option>
+                            {% for year in range(2025, 1979, -1) %}
+                            <option value="{{ year }}">{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                        
+                </div>
+                <label>Select Role</label>
+                <select name="role" required>
+                    <option value="User">User</option>
+                    <option value="Admin">Admin</option>
+                </select>
+
+                <label>Enter Email</label>
+                <input type="email" name="email" placeholder="name@email.com" required>
 
 
+                <label>Enter Password</label>
+                <input type="password" name="password" placeholder="Password" required>
+                
 
-</div>
+                <label>Confirm Password</label>
+                <input type="password" name="confirm_password"  placeholder="Confirm Password" required>
+
+                <div class="info-text">
+                    <p>Your Riget Zoo account information is used to allow you login securley and access your data.</p>
+              
+                </div>   
+
+                <button type="submit">Sign Up</button>
+
+                <div class="login-link">
+                    <p>Have an account already? <a href="{{ url_for('login') }}" class="link">Login</a></p>
+                </div>
+            </form>
+        </div>
+        <p class="footer-text">Protect wildlife for a sustainable future.</p>
+    </div>
+</body>
+</html>
