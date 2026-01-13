@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+{% block content %}
+<h2>Zoo Ticket Management</h2>
+<script src="/static/admin_dashboard.js"></script>
+
+<a href="{{ url_for('add_ticket_type') }}" class="btn">Add New Ticket</a>
+
+<table class="table">
+    <tr>
+        <th>Ticket Name</th>
+        <th>Price (£)</th>
+        <th>Available</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+
+    {% for ticket in tickets%}
+    <tr>
+        <td>{{ ticket.name }}</td>
+        <td>£{{ ticket.price }}</td>
+        <td>{{ ticket.remaining_available }} / {{ ticket.total_available }}</td>
+        <td>{{ "Active" if ticket.active else "Inactive" }}</td>
+        <td>
+            <a href="{{ url_for('admin_edit_tickets', ticket_id=ticket.ticket_type_id) }}">Edit</a>
+            <a href="{{ url_for('admin_toggle_ticket', ticket_id=ticket.ticket_type_id) }}">
+                {{ "Disable" if ticket.active else "Enable" }}
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

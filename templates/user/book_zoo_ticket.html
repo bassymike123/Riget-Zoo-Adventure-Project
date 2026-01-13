@@ -1,0 +1,27 @@
+{% extends "user/user_base.html"%}
+
+{% block content %}
+<h2>Confirm Your Tickets</h2>
+
+
+<div class="booking-card">
+    <h3>{{ ticket.name }}</h3>
+    <p>Price: £{{ ticket.price}}</p>
+
+    <form method="POST" action="{{ url_for('book_zoo_ticket', ticket_id=ticket.ticket_type_id) }}">
+        <label>Select visit date</label>
+        <input type="date" name="visit_date" id="visit_date" required>
+        <input type="time" id="visit_time" name="visit_time" required>
+        <div id="time-error" class="error-msg" style="display:none;"></div>
+        
+        <button id="continueBtn" type="submit">
+            Continue to Payment
+        </button>
+    </form>
+    <p class="opening-hours-note">
+        Opening hours vary by day.
+        <a href="{{ url_for('contact_us') }}">See Opening Hours</a>
+    </p>
+</div>
+<script src="/static/book_zoo_ticket.js"></script>
+{% endblock %}

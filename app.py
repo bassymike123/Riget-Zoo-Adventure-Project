@@ -1,24 +1,34 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, Blueprint
-from model import db, User, VisitType, Booking, Payment, LoyaltyAccount, LoyaltyTransaction
-from datetime import datetime
+from flask import Flask, render_template, request, redirect, url_for, flash, session, Blueprint, jsonify
+import stripe
+from model import db, User, VisitType, Booking, Payment, LoyaltyAccount, LoyaltyTransaction, ZooTicketType, HotelRoomType
+from datetime import datetime, time
 from flask_bcrypt import Bcrypt
 import re 
 from datetime import date
 import pyotp # generates the secret key and time based otp
-import qrcode # creates qr image for the users to scan in their authenticator
+import qrcode as qr # creates qr image for the users to scan in their authenticator
 import io
 import base64
 import random # for forgot password verification
 import string # for forgot password verification
-import time # for forgot password verification
+ # import time # for forgot password verification
 from flask_mail import Mail, Message
 from functools import wraps
 import os
+from dotenv import load_dotenv
+import uuid
+from utils.qr import generate_qr
+load_dotenv()
 
 
 app = Flask(__name__)
 app.secret_key = "my_secrect_key"
 admin_bp = Blueprint('admin', __name__, template_folder='templates', static_folder='static')
+
+app.config["STRIPE_SECRET_KEY"] = os.getenv("STRIPE_SECRET_KEY")
+app.config["STRIPE_PUBLISHABLE_KEY"] = os.getenv("STRIPE_PUBLISHABLE_KEY")
+
+stripe.api_key = app.config["STRIPE_SECRET_KEY"]
 
 # configuring the database
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///Riget_Zoo.db"
@@ -36,6 +46,8 @@ db.init_app(app)
 bcrypt = Bcrypt(app)
 mail = Mail(app)
 
+ROLE_ADMIN = "admin"
+ROLE_USER = "user"
 # -------------------------
 
 # Helper decorators
@@ -74,16 +86,29 @@ def admin_required(f):
 
         user = User.query.get(uid)
 
-        if not user or (user.role is None) or user.role.lower() != "admin":
-
+        if not user or not user.role or user.role.strip().lower() != ROLE_ADMIN:
             flash("Admin access required.", "error")
-
-            return redirect(url_for('login'))
-
+            return redirect(url_for('user_dashboardd'))
+        
         return f(*args, **kwargs)
+    return decorated          
 
+def user_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        sid = session.get('user_id')
+
+        if not sid:
+            flash("Please login to access user.", "error")
+            return redirect(url_for('login'))
+        uuser = User.query.get(sid)
+        if not uuser or not uuser.role or uuser.role.strip().lower() != ROLE_USER:
+            flash("User access required", "error")
+            return redirect(url_for('admin_dashboard'))
+        return f(*args, **kwargs)
     return decorated
- 
+
+
 
 
 
@@ -170,11 +195,11 @@ def signup():
         # creating OTP and QR code
         otp = pyotp.TOTP(secret, digits=6, interval=30)
         uri = otp.provisioning_uri(name=email, issuer_name="Riget Zoo Adventures")
-        qr = qrcode.QRCode(box_size=8, border=4)
-        qr.add_data(uri)
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="orange", back_color="white")
+        qr_code = qr.QRCode(box_size=8, border=4)
+        qr_code.add_data(uri)
         
+        qr_code.make(fit=True)
+        img = qr_code.make_image(fill_color="orange", back_color="white")
         # converting QR code to base64 so we can embed it into HTML
         buffer = io.BytesIO()
         img.save(buffer, format="PNG")
@@ -198,7 +223,7 @@ def verify():
 
         otp = pyotp.TOTP(secret, digits=6, interval=30)
         uri = otp.provisioning_uri(name=session['user_data']['email'], issuer_name="Riget Zoo Adventures")
-        qr = qrcode.QRCode(box_size=8, border=4)
+        qr = qr.QRCode(box_size=8, border=4)
         qr.add_data(uri)
         qr.make(fit=True)
         img = qr.make_image(fill_color="orange", back_color="white")
@@ -271,9 +296,9 @@ def login():
                 flash("Login sucessfully", "success")
                 return redirect(url_for('login')) # would change later
             else:
-                flash("Incorrect password. Please try again." "error")
+                flash("Incorrect password. Please try again.", "error")
         else:
-            flash("No account found with that email." "error")
+            flash("No account found with that email.", "error")
         return redirect(url_for('login'))
     
     return render_template('login.html')
@@ -304,7 +329,7 @@ def forgot_password():
              flash("Failed to send OTP. Try again later.", "error")
              return redirect(url_for('forgot_password'))
          
-         flash('OTP sent to your email. Check your inbox.' 'info')
+         flash('OTP sent to your email. Check your inbox.', 'info')
          return redirect(url_for('verify_otp'))
      
      return render_template('forgot_password.html')
@@ -390,21 +415,10 @@ def contact_us():
     return render_template('contact_us.html')
 
 @app.route('/loyalty')
+@login_required
 def loyalty():
-    return render_template('dashboard_user')
+    return render_template('admin/loyalty.html')
 
-@app.route('/user')
-def user_dashboard():
-    if 'user_id' not in session:
-        return redirect(url_for('login'))
-    
-    user_info = {
-        'id' : session['user_id'],
-        'full_name' : session['fullname']
-    }
-    
-    user = User.query.get(session['user_id'])
-    return render_template('dashboard_user.html', user=user, user_info=user_info)
 
 # -------------------------
 
@@ -431,7 +445,12 @@ def admin_dashboard():
     recent_bookings = Booking.query.order_by(Booking.visit_date.desc()).limit(7).all()
 
     visit_types = VisitType.query.all()
-
+    
+    admin_info = {
+        'id': session['user_id'],
+        'full_name': session['fullname']
+    }
+    user = User.query.get(session['user_id'])
     return render_template('admin_dashboard.html',
 
                            total_users=total_users,
@@ -444,7 +463,10 @@ def admin_dashboard():
 
                            recent_bookings=recent_bookings,
 
-                           visit_types=visit_types)
+                           visit_types=visit_types,
+                           user=user,
+                           admin=admin_info
+                           )
 
 
 # VisitType CRUD
@@ -643,7 +665,7 @@ def edit_user(user_id):
 
     return redirect(url_for('admin_users'))
 
-@app.route('/admin/users/<int:user_id>/delete', methods=['POST'])
+@app.route('/admin/users/<int:user_id>/delete', methods=['GET'])
 
 @login_required
 
@@ -665,11 +687,6 @@ def delete_user(user_id):
 # Loyalty management
 
 @app.route('/admin/loyalty/<int:user_id>', methods=['GET'])
-
-@login_required
-
-@admin_required
-
 def view_loyalty(user_id):
 
     la = LoyaltyAccount.query.filter_by(user_id=user_id).first()
@@ -791,13 +808,15 @@ def admin_bookings():
 @login_required
 @admin_required
 def admin_payments():
-    return render_template('admin/payments.html')
+    payments = Payment.query.join(Booking).order_by(Payment.payment_date.desc()).all()
+    return render_template('admin/payments.html', payments=payments)
 
 @app.route('/admin/users')
 @login_required
 @admin_required
 def admin_users():
-    return render_template('admin/users.html')
+    users = User.query.all()
+    return render_template('admin/users.html', users=users)
 
 
 @app.route('/admin/loyalty')
@@ -805,7 +824,408 @@ def admin_users():
 @admin_required
 def admin_loyalty():
     flash("Select a user first.", "info")
-    return render_template('admin/loyalty.html')
+    return render_template('admin/loyalty.html', account=None, transactions=None)
+
+# app route to view all tickets
+@app.route('/admin/tickets')
+@login_required
+@admin_required
+def admin_tickets():
+    tickets = ZooTicketType.query.all()
+    return render_template("admin/admin_tickets.html", tickets=tickets)
+
+# add ticket types as an admin
+@app.route("/admin/tickets/add", methods=["GET", "POST"])
+@login_required
+@admin_required
+def add_ticket_type():
+    if request.method == "POST":
+        name = request.form["ticket_type_name"].strip()
+        price = float(request.form["price"])
+        total = int(request.form["total_available"])
+    
+
+        ticket = ZooTicketType(
+            name=name, price=price, 
+            total_available=total, 
+            remaining_available=total
+            )
+        db.session.add(ticket)
+        db.session.commit()
+        flash(" Zoo Ticket type added.", "success")
+        return redirect(url_for("admin_tickets"))
+    
+    return render_template("admin/admin_add_ticket.html")
+# route for admin to edit ticket types
+@app.route("/admin/tickets/edit/<int:ticket_id>", methods=["GET", "POST"])
+@login_required
+@admin_required
+def admin_edit_tickets(ticket_id):
+    ticket = ZooTicketType.query.get_or_404(ticket_id)
+
+    if request.method == "POST":
+        ticket.name = request.form["name"].strip()
+        ticket.price = float(request.form["price"])
+        new_total = int(request.form["total_available"])
+
+        # adjust remaining based on new total
+        diff = new_total - ticket.total_available
+        ticket.remaining_available += diff
+        ticket.total_available = new_total
+
+        ticket.active = "active" in request.form
+        db.session.commit()
+        flash("Ticket updated successfully,", "success")
+        return redirect(url_for("admin_tickets"))
+    return render_template("admin/admin_edit_ticket.html", ticket=ticket)
+# this preserves existing bookings
+# if an admin increases stock, the remaining stock increases accordingly
+# if an admin decreases stock, the remaining stock decreases but not below zero
+
+# toggle active status of ticket types
+@app.route("/admin/tickets/toggle/<int:ticket_id>")
+@login_required
+@admin_required
+def admin_toggle_ticket(ticket_id):
+    ticket = ZooTicketType.query.get_or_404(ticket_id)
+    ticket.active = not ticket.active
+    db.session.commit()
+    flash("Ticket status toggled.", "success")
+    return redirect(url_for("admin_tickets"))
+
+@app.route("/admin/hotel")
+@login_required
+@admin_required
+def admin_hotel_rooms():
+    rooms = HotelRoomType.query.all()
+    return render_template("admin/admin_hotel_rooms.html", rooms=rooms)
+
+
+# route for admin to add  new hotel room types
+@app.route("/admin/hotel/add", methods=["GET", "POST"])
+@login_required
+@admin_required
+def admin_add_hotel_room():
+    if request.method == "POST":
+        room = HotelRoomType(
+        name = request.form['name'].strip(),
+        description = request.form['description'].strip(),
+        price_per_night = request.form['price'],
+        total_rooms = request.form['total_rooms'],
+        remaining_rooms = request.form['total_rooms']
+        )
+        db.session.add(room)
+        db.session.commit()
+        
+        return redirect(url_for("admin_hotel_rooms"))
+    
+    return render_template("admin/admin_add_hotel_room.html")   
+
+
+# route for admin to edit hotel room types
+@app.route("/admin/hotel/edit/<int:room_id>", methods=["GET", "POST"])  
+@login_required
+@admin_required
+def admin_edit_hotel_room(room_id):
+    room = HotelRoomType.query.get_or_404(room_id)
+    
+    if request.method == "POST":
+        room.name = request.form['name']
+        room.description = request.form['description']
+        room.price_per_night = float(request.form['price'])
+        room.total_rooms = int(request.form['total_rooms'])
+        
+        if room.remaining_rooms > room.total_rooms:
+            room.remaining_rooms = room.total_rooms
+            
+        db.session.commit()
+        return redirect(url_for("admin_hotel_rooms"))
+    
+    return render_template("admin/admin_edit_hotel_rooms.html", room=room)
+
+
+# route for admin to enable and disbale room types
+@app.route("/admin/hotel/toggle/<int:room_id>")
+@login_required
+@admin_required
+def admin_toggle_hotel_room(room_id):
+    room = HotelRoomType.query.get_or_404(room_id)
+    room.active = not room.active
+    db.session.commit()
+    return redirect(url_for("admin_hotel_rooms"))
+
+# route for users main dashboard
+@app.route("/user/dashboard")
+@login_required
+@user_required
+
+
+def user_dashboardd():
+    # admin should never land here
+    user = User.query.get(session["user_id"])
+    
+    # bookings 
+    user_bookings = Booking.query.filter_by(
+        user_id =user.user_id
+    ).all()
+    total_bookings = len(user_bookings)
+    upcoming_visits = Booking.query.filter(
+        Booking.user_id == user.user_id,
+        Booking.visit_date >= date.today(),
+        Booking.status != "Cancelled"
+    ).count()
+
+    # payments
+    total_payments = Payment.query.join(Booking).filter(
+        Booking.user_id == user.user_id
+    ).count()
+    
+    
+
+    #loyalty
+    loyalty = LoyaltyAccount.query.filter_by(
+        user_id=user.user_id
+    ).first()
+    
+    membership_level = (
+        "GOLD" if user.loyalty_points >= 500 else
+        "SILVER" if user.loyalty_points >= 200 else
+        "BRONZE"
+    )
+    loyalty_points = loyalty.points if loyalty else 0
+    membership_level = loyalty.membership_level if loyalty else "None"
+    
+    uusser_info = {
+        'full_name': session['fullname']
+    }
+    
+    
+
+    return render_template(
+        "user/dashboard.html",
+        total_bookings=total_bookings,
+        upcoming_visits=upcoming_visits,
+        total_payments=total_payments,
+        loyalty_points=loyalty_points,
+        membership_level=membership_level,
+        user=user,
+        uusser_info=uusser_info
+    )
+
+# route for user bookings
+@app.route("/user/bookings")
+@login_required
+@user_required
+def user_bookings():
+    
+
+    bookings = Booking.query \
+    .filter_by(user_id=session["user_id"]) \
+    .order_by(Booking.visit_date.desc()) \
+    .all()
+    
+    today = date.today()
+    
+    upcoming = [b for b in bookings if b.visit_date >= today]
+    past = [b for b in bookings if b.visit_date < today]
+    
+    return render_template(
+        "user/booking.html",
+        upcoming=upcoming,
+        past=past
+    )
+    
+# route for user zoo tickets
+@app.route("/user/zoo-tickets")
+@login_required
+@user_required
+
+def user_zoo_tickets():
+    
+    tickets = ZooTicketType.query.filter(
+        ZooTicketType.active == True,
+        ZooTicketType.remaining_available > 0
+        ).all()
+    
+    return render_template(
+        "user/zoo_tickets.html",
+        tickets=tickets
+    )
+
+# opening Hours
+def get_opening_hours_py(date):
+    weekday = date.weekday()  # 0 = Monday
+    
+    if weekday <= 4:
+        return time(9, 0), time(18, 0)  # Weekdays: 9 AM - 6 PM
+    elif weekday == 5:
+        return time(9, 0), time(19, 0) # Saturday: 9 AM - 7 PM
+    else:
+        return time(10, 0), time(17, 0) # Sunday: 10 AM - 5 PM
+
+# route for zoo ticket booking
+@app.route("/user/zoo-tickets/book/<int:ticket_id>", methods=["GET", "POST"])
+@login_required
+@user_required
+
+def book_zoo_ticket(ticket_id):
+    ticket = ZooTicketType.query.get_or_404(ticket_id)
+    
+    if not ticket.active or ticket.remaining_available <= 0:
+        flash("This ticket is no longer available.", "error")
+        return redirect(url_for("user_zoo_tickets"))
+    
+    if request.method == "POST":
+        visit_date = datetime.strptime(
+            request.form["visit_date"], "%Y-%m-%d"
+            ).date()
+        
+        visit_time = datetime.strptime(
+            request.form["visit_time"], "%H:%M"
+            ).time()
+        
+        # date check
+        if visit_date < date.today():
+            flash("You cannot book a past date.", "error")
+            return redirect(url_for("book_zoo_ticket", ticket_id=ticket_id))
+        
+        open_time, close_time = get_opening_hours_py(visit_date)
+        
+        if not (open_time <= visit_time <= close_time):
+            flash(f"Visit time must be within opening hours: {open_time.strftime('%I:%M %p')} - {close_time.strftime('%I:%M %p')}", "error")
+            return redirect(url_for("book_zoo_ticket", ticket_id=ticket_id))
+        
+        booking = Booking(
+            user_id=session["user_id"],
+            visit_type_id=ticket.ticket_type_id,   # zoo ticket, not visit type
+            visit_date=visit_date,
+            number_of_guests=1,  
+            status="Pending",
+        )
+
+        ticket.remaining_available -= 1
+        db.session.add(booking)
+        db.session.commit()
+        
+        flash("Ticket reserved. Please proceed to payment.", "success")
+        return redirect(url_for("payment_page", booking_id=booking.booking_id))
+    
+    return render_template(
+        "user/book_zoo_ticket.html",
+        ticket=ticket
+    )
+
+# payment route with stripe
+@app.route("/user/payment/<int:booking_id>")
+@login_required
+@user_required
+def payment_page(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    
+    if booking.status != "Pending":
+        flash("This booking has already been paid.", "info")
+        return redirect(url_for("user_bookings"))
+    
+    # determine price (Zoo ticket)
+    ticket = ZooTicketType.query.get(booking.visit_type_id)
+    amount = ticket.price
+    
+    
+    # reusing exisiting intent
+    if booking.payment_intent_id:
+        intent = stripe.PaymentIntent.retrieve(booking.payment_intent_id)
+    else:
+        intent = stripe.PaymentIntent.create(
+            amount=int(amount * 100),
+            currency="gbp",
+            metadata={"booking_id": booking.booking_id}
+        )
+    
+    return render_template(
+        "user/payment.html",
+        booking=booking,
+        ticket=ticket,
+        amount=amount,
+        client_secret=intent.client_secret,
+        stripe_public_key=app.config["STRIPE_PUBLISHABLE_KEY"]
+    )
+
+# route to confirm payment
+@app.route("/user/payment/confirm", methods=["POST"])
+@login_required
+@user_required
+
+def confirm_payment():
+    data = request.get_json() or {}
+    payment_intent_id = data.get("payment_intent_id")
+    if not payment_intent_id:
+
+        return jsonify({"status": "error", "message": "Missing payment_intent_id"}), 400
+    intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+    # Only proceed if Stripe says it succeeded
+    if intent.status != "succeeded":
+        return jsonify({"status": "not_paid"}), 400
+    booking_id = intent.metadata.get("booking_id")
+    if not booking_id:
+        return jsonify({"status": "error", "message": "No booking_id in metadata"}), 400
+    booking = Booking.query.get_or_404(int(booking_id))
+    if booking.status == "Confirmed":
+        return jsonify({"status": "already_paid", "booking_id": booking.booking_id})
+    # Create payment row
+
+    payment = Payment(
+        booking_id=booking.booking_id,
+        amount=intent.amount / 100,
+        payment_method="Stripe",
+        status="Completed"
+    )
+
+    # Confirm booking
+    booking.status = "Confirmed"
+    # QR token + QR image
+
+    booking.qr_token = uuid.uuid4().hex
+    booking.qr_image = generate_qr(booking.qr_token, booking.booking_id)
+    # Loyalty points (fetch user safely)
+
+    user = User.query.get_or_404(booking.user_id)
+    if user.loyalty_points is None:
+        user.loyalty_points = 0
+    user.loyalty_points += int(payment.amount * 10)
+    # Save everything
+
+    db.session.add(payment)
+    db.session.add(booking)
+    db.session.add(user)
+    db.session.commit()
+    return jsonify({"status": "success", "booking_id": booking.booking_id})
+     
+# success page route
+@app.route("/user/payment/success/<int:booking_id>")
+@login_required
+@user_required
+def payment_success(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    
+    if booking.status != "Confirmed":
+        flash("Payment not completed.", "error")
+        return redirect(url_for("user_bookings"))
+    
+    return render_template(
+        "user/payment_success.html",
+        booking=booking
+    )
+    
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -813,12 +1233,6 @@ def admin_loyalty():
 # Run app
 
 # -------------------------
-
-
-
-
- 
-
 if __name__ == "__main__":
     app.run(debug=True)
     

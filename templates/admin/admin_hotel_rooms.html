@@ -1,0 +1,42 @@
+{% extends "admin/base.html" %}
+{% block content %}
+<h2>Hotel Room Management</h2>
+<link rel="stylesheet" href="/static/admin_dashboard.css">
+<script src="/static/admin_dashboard.js"></script>
+
+<a href="{{ url_for('admin_add_hotel_room') }}" class="btn">Add New Room Type</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Price / Night (£)</th>
+            <th>Availability</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for room in rooms %}
+        <tr>
+            <td>{{ room.name }}</td>
+            <td>£{{ room.price_per_night }}</td>
+            <td>{{ room.remaining_rooms}} / {{ room.total_rooms }}</td>
+            <td>{{ "Active" if room.active else "Inactive" }}</td>
+
+            <td>
+                <a href="{{ url_for('admin_edit_hotel_room', room_id=room.room_type_id) }}">Edit</a> |
+                <a href="{{ url_for('admin_toggle_hotel_room', room_id=room.room_type_id) }}">
+                    {{ "Disable" if room.active else "Enable" }}
+                </a>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5">No hotel rooms added yet.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

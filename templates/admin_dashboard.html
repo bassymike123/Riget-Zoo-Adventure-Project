@@ -18,7 +18,8 @@
 <a href="{{ url_for('admin_bookings') }}" class="nav-link">Bookings</a>
 <a href="{{ url_for('admin_payments') }}" class="nav-link">Payments</a>
 <a href="{{ url_for('admin_users') }}" class="nav-link">Users</a>
-<a href="{{ url_for('admin_loyalty') }}" class="nav-link">Loyalty</a>
+<a href="{{ url_for('admin_loyalty') }}" class="nav-link">Loyalty</a
+    
 <form method="GET" action="{{ url_for('logout') }}">
 <button class="btn-ghost" type="submit">Logout</button>
 </form>
@@ -27,6 +28,10 @@
 <main class="admin-main">
 <header class="admin-header">
 <h1>Dashboard</h1>
+<div class="profile-info">
+    <p><strong>ID:</strong> {{ user.id}}</p>
+    <p><strong>Name:</strong> {{ user.full_name}}</p>
+</div>
 <div class="header-actions">
 <span class="stat">Users: {{ total_users }}</span>
 <span class="stat">Bookings: {{ total_bookings }}</span>

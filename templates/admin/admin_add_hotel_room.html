@@ -1,0 +1,15 @@
+{% extends "admin/base.html" %}
+{% block content %}
+<h2>Add Hotel Room Type</h2>
+<link rel="stylesheet" href="/static/admin_dashboard.css">
+<script src="/static/admin_dashboard.js"></script>
+
+<form method="POST" class="form-grid">
+    <input name="name" placeholder="Room Name" required>
+    <input name="price" type="number" step="0.01" placeholder="Price per night (£)" required>
+    <input name="total_rooms" type="number" placeholder="Total Rooms" required>
+    <input name="description" placeholder="Description">
+
+    <button class="btn" type="submit">Add Room </button>
+</form>
+{% endblock %}

@@ -1,0 +1,136 @@
+<script src="https://js.stripe.com/v3/"></script>
+
+<h2>Confirm Payment</h2>
+
+<p>Ticket: {{ ticket.name }}</p>
+<p>Date: {{ booking.visit_date }} at {{ booking.visit_time }}</p>
+<p>Total: £{{ amount }}</p>
+
+<div id="card-element"></div>
+<button id="pay-btn">PAY NOW</button>
+
+<p id="payment-error" style="color:red;"></p>
+
+<script>
+
+const stripe = Stripe("{{ stripe_public_key }}");
+
+const elements = stripe.elements();
+
+const card = elements.create("card");
+
+card.mount("#card-element");
+
+const payBtn = document.getElementById("pay-btn");
+
+const errEl = document.getElementById("payment-error");
+
+payBtn.addEventListener("click", async () => {
+
+  payBtn.disabled = true;
+
+  payBtn.innerText = "Processing...";
+
+  errEl.textContent = "";
+
+  try {
+
+    const { paymentIntent, error } = await stripe.confirmCardPayment(
+
+      "{{ client_secret }}",
+
+      { payment_method: { card } }
+
+    );
+
+    if (error) {
+
+      payBtn.disabled = false;
+
+      payBtn.innerText = "PAY NOW";
+
+      errEl.textContent = error.message;
+
+      return;
+
+    }
+
+    // If Stripe ever returns something else
+
+    if (!paymentIntent || paymentIntent.status !== "succeeded") {
+
+      payBtn.disabled = false;
+
+      payBtn.innerText = "PAY NOW";
+
+      errEl.textContent = "Payment not completed. Please try again.";
+
+      return;
+
+    }
+
+    const res = await fetch("/user/payment/confirm", {
+
+      method: "POST",
+
+      headers: { "Content-Type": "application/json" },
+
+      body: JSON.stringify({ payment_intent_id: paymentIntent.id })
+
+    });
+
+    // IMPORTANT: if backend returned HTML (redirect/error), show it
+
+    const contentType = res.headers.get("content-type") || "";
+
+    if (!res.ok) {
+
+      const text = await res.text();
+
+      throw new Error(`Confirm failed (${res.status}). ${text.slice(0, 200)}`);
+
+    }
+
+    if (!contentType.includes("application/json")) {
+
+      const text = await res.text();
+
+      throw new Error(`Confirm returned non-JSON: ${text.slice(0, 200)}`);
+
+    }
+
+    const data = await res.json();
+
+    if (data.status === "success") {
+
+      window.location.href = `/user/payment/success/${data.booking_id}`;
+
+      return;
+
+    }
+
+    // If backend responds with already_paid etc
+
+    if (data.status === "already_paid") {
+
+      window.location.href = `/user/payment/success/${data.booking_id}`;
+
+      return;
+
+    }
+
+    throw new Error("Confirm did not return success.");
+
+  } catch (e) {
+
+    payBtn.disabled = false;
+
+    payBtn.innerText = "PAY NOW";
+
+    errEl.textContent = e.message || "Unknown error confirming payment.";
+
+  }
+
+});
+</script>
+ 

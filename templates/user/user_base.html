@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="/static/user_dashboard.css">
+</head>
+<body class="user-body">
+    <div class="user-shell">
+        <!--Sidebar-->
+        <aside class="user-sidebar">
+            <div class="brand">
+                <h2>Riget Zoo Adventures</h2>
+                <p class="role">User Dashboard</p>
+            </div>
+            <nav class="user-nav">
+                <a href="{{ url_for('user_dashboardd') }}" class="nav-link">Overview</a>
+                <a href="{{ url_for('user_bookings') }}" class="nav-link">My Bookings</a>
+                <a href="{{ url_for('user_zoo_tickets') }}" class="nav-link">Zoo Tickets</a>
+                    <button class="btn-ghost" type="submit">Logout</button>
+                </form> 
+            </nav>
+        </aside>
+
+        <!--Main Content-->
+        <main class="user-main">
+
+            {% block content %}{% endblock %}
+
+        </main>
+    </div>
+    <script src="/static/user_dashboard.js"></script>
+    
+</body>
+</html>
+
+
+
+
+
+
+
+
+

@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import uuid
  # to initalsie the database
 db = SQLAlchemy()
 
@@ -12,6 +13,8 @@ class User(db.Model):
     date_of_birth = db.Column(db.String(10), nullable=False)
     role = db.Column(db.String(20), nullable=False, default="User")
     date_joined = db.Column(db.DateTime, default=datetime.utcnow)
+    loyalty_points = db.Column(db.Integer, default=0)
+    bookings = db.relationship("Booking", backref="user", lazy=True)
     
     
 # loylaty and booking relationship
@@ -48,6 +51,8 @@ class Booking(db.Model):
     visit_date = db.Column(db.Date, nullable=False)
     number_of_guests = db.Column(db.Integer, nullable=False)
     status = db.Column(db.String(50), default="Pending")
+    qr_token = db.Column(db.String(64), unique=True, nullable=True)
+    payment_intent_id = db.Column(db.String(255), nullable=True)
     
 # linking payments to booking
 payment = db.relationship("Payment", backref="booking", uselist=False)
@@ -60,7 +65,8 @@ class Payment(db.Model):
     amount = db.Column(db.Float, nullable=False)
     payment_method = db.Column(db.String(50))
     payment_date = db.Column(db.DateTime, default=datetime.utcnow)
-    
+    status = db.Column(db.String(50), default="Completed")
+    booking = db.relationship("Booking", backref="payment",)  
 #loyalty Acocunt Table
 class LoyaltyAccount(db.Model):
     __tablename__ = "loyalty_accounts"
@@ -87,7 +93,29 @@ class AccessibilitySettings(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable=False)
     dark_mode = db.Column(db.Boolean, default=False)
     text_size = db.Column(db.String(20), default="medium")
+
+class ZooTicketType(db.Model):
+    __tablename__ = "zoo_ticket_types"
     
+    ticket_type_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    description = db.Column(db.Text)    
+    total_available = db.Column(db.Integer, nullable=False)
+    remaining_available = db.Column(db.Integer, nullable=False)  # this is what bookings would reduce, Admin can reset and increase stock anytime
+    active = db.Column(db.Boolean, default=True)
+    image = db.Column(db.String(255))  # URL or path to the image
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)  
     
+class HotelRoomType(db.Model):
+    __tablename__ = "hotel_room_types"
     
+    room_type_id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(255))
+    price_per_night = db.Column(db.Float, nullable=False)
     
+    total_rooms = db.Column(db.Integer, nullable=False)
+    remaining_rooms = db.Column(db.Integer, nullable=False)  # bookings would reduce this, Admin can reset and increase stock anytime
+    
+    active = db.Column(db.Boolean, default=True)
