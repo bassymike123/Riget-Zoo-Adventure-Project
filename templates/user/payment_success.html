@@ -1,0 +1,19 @@
+{% extends "user/user_base.html" %}
+{% block content %}
+
+<div class="success-box">
+    <link rel="stylesheet" href="/static/home.css">
+    <h2>🎉 Payment Successful</h2>
+    <p>Your zoo ticket has been confirmed.</p>
+
+    <ul>
+        <li><strong>Booking ID:</strong> {{ booking.booking_id }}</li>
+        <li><strong>Date:</strong> {{ booking.visit_date }}</li>
+        <li><strong>Status:</strong>{{ booking.status }}</li>
+    </ul>
+
+    <a href="{{ url_for('user_bookings') }}" class="btn">
+        View My Bookings
+    </a>
+</div>
+{% endblock %}

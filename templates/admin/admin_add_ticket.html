@@ -1,0 +1,19 @@
+{% extends "admin/base.html" %}
+{% block content %}
+<h2>Add New Ticket Type</h2>
+<link rel="stylesheet" href="/static/admin_dashboard.css">
+<script src="/static/admin_dashboard.js"></script>
+
+<form method="POST">
+    <label>Ticket Type Name:</label>
+    <input type="text" name="ticket_type_name" required>
+
+    <label>Price (£)</label>
+    <input type="number" step="0.01" name="price" required>
+
+    <label>Total Available</label>
+    <input type="number" name="total_available" required>
+
+    <button type="submit">Add Ticket Type</button>
+</form>
+{% endblock %}

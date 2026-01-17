@@ -1,0 +1,36 @@
+{% extends "user/user_base.html" %}
+{% block content %}
+<header class="dashboard-header">
+    
+    <h1>Welcome, {{ user.full_name }}</h1>
+    <p>Here's a summary of your activity at Riget Zoo</p>
+</header>
+<section class="overview-cards">
+    <div class="card">
+        <h3>Total Bookings</h3>
+        <div class="big">{{ total_bookings }}</div>
+    </div>
+    <div class="card">
+        <h3>Upcoming Visits</h3>
+        <div class="big">{{ upcoming_visits }}</div>
+    </div>
+    <div class="card">
+        <h3>Loyalty Points</h3>
+        <div class="big"> {{ user.loyalty_points }}</div>
+        <small>Membership: {{ membership_level }}</small>
+    </div>
+    <div class="card">
+        <h3>Payments Made</h3>
+        <small>Payments Made: {{ total_payments }}</small>
+
+    </div>
+</section>
+<section class="panel">
+    <h2>Quick Actions</h2>
+    <div class="quick-actions">
+        <a href="{{ url_for('user_zoo_tickets') }}" class="btn">Book Zoo Tickets</a>
+        
+        <a href="{{ url_for('user_bookings') }}" class="btn">View My Bookings</a>
+    </div>
+</section>
+{% endblock %}
